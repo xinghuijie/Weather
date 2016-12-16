@@ -1,0 +1,128 @@
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+	<script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+	<script type="text/javascript">
+
+		var app = angular.module('myApp', []);
+
+		app.controller('siteCtrl', function($scope, $http) {
+				$scope.city_list = [];
+
+				$scope.cityID="";
+				$scope.getWeather = function(){
+					$scope.city = this.city_info.name;
+					$scope.cityID=this.city_info.id;
+					$http({
+						method:'GET',
+						url:"https://free-api.heweather.com/v5/now",
+						params:{
+						"city":$scope.cityID,"key":"af2246805f364fa8a1b0c8531367701d"
+						}
+					}).success(function(data,header,config,status){
+						
+						$scope.tem = data.HeWeather5[0].now.tmp+"度";
+						$scope.weather = data.HeWeather5[0].now.cond.txt;
+						// $scope.date=data.HeWeather5[0].basic;
+						// $scope.city=$scope.date.city;
+						// $scope.cnty=$scope.date.cnty;
+						// $scope.id=$scope.date.id;
+						// $scope.lat=$scope.date.lat;
+						
+						// $scope.lon=$scope.date.lon;
+						// $scope.prov=$scope.date.prov;
+						// $scope.loc=$scope.date.update.loc;
+						// $scope.utc=$scope.date.update.utc;
+
+						
+						// $scope.date1=data.HeWeather5[0].daily_forecast[1];
+						// console.log($scope.date1.cond);
+						// $scope.code_d=$scope.date1.cond.code_d;
+						// $scope.code_n=$scope.date1.cond.code_n;
+						
+					}).error(function(data,header,config,status){
+					//处理响应失败
+					console.log("---"+data+"--"+status);
+
+					});
+				}
+  				// 添加城市操作
+  				
+  				$scope.add=function(){
+
+					var len = $scope.city_list.length;
+					//判断数组中是否已存在城市
+					var inArr = true;
+					for (var i = 0; i < len; i++) {
+						if (this.name == $scope.city_list[i].name) {
+							inArr = false;
+							break;
+						}
+					}
+					if (inArr) {
+						
+					$http({
+  						method:'GET',
+						url:"https://free-api.heweather.com/v5/search",
+						params:{
+						"city":$scope.name,"key":"af2246805f364fa8a1b0c8531367701d"
+						}
+  					}).success(function(data,header,config,status){
+  						 $scope.date=data;
+  						 var item = {
+  						 	"name":data.HeWeather5[0].basic.city,
+  						 	"id":data.HeWeather5[0].basic.id
+  						 }
+  						 $scope.city_list.push(item);
+  						 console.log($scope.date.HeWeather5[0].basic.city);
+  							
+  					}).error(function(data,header,config,status){
+					//处理响应失败
+					alert("请输入正确地名");
+
+					});
+					}else{
+						alert("请不要重复添加城市");
+					}
+
+  				}
+
+  				$scope.deleteCity = function(){
+  					for (var i = 0; i < $scope.city_list.length; i++) {
+
+						if ($scope.city_list[i].id == this.city_info.id) {
+							//删除
+							$scope.city_list.splice(i,1);
+							break;
+						}	
+					}
+  				}
+
+});
+
+	</script>
+</head>
+<body ng-app="myApp" ng-controller="siteCtrl">
+		
+		<input type="text" placeholder="请输入城市" ng-model="name"></input>
+		<button ng-click="add()">添加</button><br>
+		<!-- 存放容器的table -->
+	<table width = "400px">
+		<caption>城市列表</caption>
+		<tr ng-repeat = "city_info in city_list">
+			<td>{{city_info.id}}</td>
+			<td>{{city_info.name}}</td>
+			<td><a href="#" ng-click="getWeather()">查询天气</a></td>	
+			<td><a href="#" ng-click="deleteCity()">删除</a></td>			
+		</tr>
+	</table>
+		<div style="right: 50%;top:50%;position: absolute;">
+			城市名称:<span>{{city}}</span ><br>
+			当前温度:<span>{{tem}}</span><br>
+			当前天气:<span>{{weather}}</span><br>
+		</div>
+		
+</body>
+</html>
